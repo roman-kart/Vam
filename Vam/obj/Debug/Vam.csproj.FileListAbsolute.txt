@@ -1,0 +1,8 @@
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\bin\Debug\Vam.exe.config
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\bin\Debug\Vam.exe
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\bin\Debug\Vam.pdb
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.csproj.AssemblyReference.cache
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.csproj.SuggestedBindingRedirects.cache
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.csproj.CoreCompileInputs.cache
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.exe
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.pdb
