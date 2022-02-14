@@ -46,8 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\CommandList.cs" />
-    <Compile Include="Commands\StartCommand.cs" />
+    <Compile Include="Commands\OptionsCommandLine.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\WorkWithFiles.cs" />
     <Compile Include="Program.cs" />

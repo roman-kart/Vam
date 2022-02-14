@@ -6,3 +6,6 @@ C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.csproj.SuggestedBindi
 C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.csproj.CoreCompileInputs.cache
 C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.exe
 C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.pdb
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\bin\Debug\CommandLine.dll
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\bin\Debug\CommandLine.xml
+C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\obj\Debug\Vam.csproj.CopyComplete
