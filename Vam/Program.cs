@@ -23,20 +23,13 @@ namespace Vam
                 {
                     foreach (var file in p.Cat)
                     {
-                        var fullPathToFile = WorkWithFiles.GetPathToFile(file); // получение полного пути до файла
-                        bool fileExists = File.Exists(fullPathToFile); // существует ли файл?
-                        if (fileExists)
-                        {
-                            Console.WriteLine(WorkWithFiles.ReadAllFile(file));
-                        }
+                        CatCommand.Do(file);
                     }
                 }
                 // если была набрана команда --vam
                 else if (p.Vam != null)
                 {
-                    var fullPathToFile = WorkWithFiles.GetPathToFile(p.Vam); // получение полного пути до файла
-                    bool isFileExists = File.Exists(fullPathToFile); // существует ли файл?
-
+                    VamCommand.Do(p.Vam);
                 }
             });
             //var file = WorkWithFiles.GetFile(pathToFile);
