@@ -16,6 +16,11 @@ namespace Vam.Files
         {
             return path.Trim().Trim('"');
         }
+        /// <summary>
+        /// Возврашает полный путь до файла в зависимости от выбранного пользователем формата
+        /// </summary>
+        /// <param name="userPathToFile"></param>
+        /// <returns></returns>
         public static string GetPathToFile(string userPathToFile)
         {
             userPathToFile = NormalizePath(userPathToFile);
