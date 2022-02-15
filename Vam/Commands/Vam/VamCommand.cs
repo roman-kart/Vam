@@ -5,11 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Vam.Files;
+using Vam.Commands.Vam;
 
 namespace Vam.Commands
 {
     public class VamCommand
     {
+        private static int maxWidth = 120;
+        private static int maxHeight = 120;
         public static void Do(string path)
         {
             var fullPathToFile = WorkWithFiles.GetPathToFile(path); // получение полного пути до файла
@@ -21,8 +24,25 @@ namespace Vam.Commands
             }
 
             var content = WorkWithFiles.ReadAllFile(fullPathToFile); // получаем содержимое файла
+
+            var splitContent = content.Split('\n');
+            var lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
+            // если необходимо - увеличиваем буфер по горизонтали
+            Console.WriteLine(lengthOfLongestRow);
+            if (lengthOfLongestRow > Console.BufferWidth)
+            {
+                var diffBtwMaxLengthAndMaxWidth = maxWidth - lengthOfLongestRow; // разница между максимальной шириной окна и длиной наиболее длинной строки
+                Console.WindowWidth = diffBtwMaxLengthAndMaxWidth <= 0 ? maxWidth : maxWidth - diffBtwMaxLengthAndMaxWidth; // устанавливаем размер окна
+                Console.BufferWidth = lengthOfLongestRow; // увеличиваем буфер на размер длины максимальной по длине строки
+            }
+            var startCursorPosition = new { Left = Console.CursorLeft, Top = Console.CursorTop}; // позиция курсора до вывода файла
+            
             Console.WriteLine(content); // выводим содержание файла на экран
+            var endCursorPosition = new { Left = Console.CursorLeft, Top = Console.CursorTop }; // самая левая позиция курсора после вывода файла
+            Console.SetCursorPosition(startCursorPosition.Left, startCursorPosition.Top); // устанавливаем курсор на начало файла
+            
             var terminateCommand = new ConsoleKeyInfo('D', ConsoleKey.D, false, false, true); // команда завершения работы - Ctrl + D
+            
             var currentKey = Console.ReadKey(true); // принимаем первый введенный пользователем символ
             // пока не подана команда на остановку редактирования, исполняем команды пользователя
             while (currentKey.Modifiers != terminateCommand.Modifiers || currentKey.Key != currentKey.Key)
@@ -47,7 +67,7 @@ namespace Vam.Commands
                         break;
                     case ConsoleKey.UpArrow:
                         // если курсор не выходит за пределы экрана
-                        if (NavigationCheck.IsCursorInBuffer(topDifference: -1))
+                        if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: endCursorPosition.Top))
                         {
                             Console.CursorTop -= 1;
                         }
@@ -61,7 +81,7 @@ namespace Vam.Commands
                         break;
                     case ConsoleKey.DownArrow:
                         // если курсор не выходит за пределы экрана
-                        if (NavigationCheck.IsCursorInBuffer(topDifference: 1))
+                        if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: endCursorPosition.Top))
                         {
                             Console.CursorTop += 1;
                         }
@@ -157,6 +177,7 @@ namespace Vam.Commands
                 }
                 currentKey = Console.ReadKey(true); // получаем следующий введенный пользователем символ
             }
+            Console.SetCursorPosition(endCursorPosition.Left, endCursorPosition.Top); // ставим курсор на строку после выведенного текста
         }
     }
 }
