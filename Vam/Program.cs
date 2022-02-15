@@ -25,7 +25,10 @@ namespace Vam
                     {
                         var fullPathToFile = WorkWithFiles.GetPathToFile(file); // получение полного пути до файла
                         bool fileExists = File.Exists(fullPathToFile); // существует ли файл?
-                            
+                        if (fileExists)
+                        {
+                            Console.WriteLine(WorkWithFiles.ReadAllFile(file));
+                        }
                     }
                 }
                 // если была набрана команда --vam
@@ -33,7 +36,7 @@ namespace Vam
                 {
                     var fullPathToFile = WorkWithFiles.GetPathToFile(p.Vam); // получение полного пути до файла
                     bool isFileExists = File.Exists(fullPathToFile); // существует ли файл?
-                    
+
                 }
             });
             //var file = WorkWithFiles.GetFile(pathToFile);
