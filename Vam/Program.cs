@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using CommandLine;
 using Vam.UI;
 using Vam.Files;
+using Vam.Commands;
 
 namespace Vam
 {
@@ -13,32 +15,30 @@ namespace Vam
     {
         static void Main(string[] args)
         {
-            #region Is File Argument Valid
-            // если пользователь не указал файл, то выводим сообщение об ошибке и завершаем работу программы
-            if (args.Length == 0)
+            var result = CommandLine.Parser.Default.ParseArguments<OptionsCommandLine>(args);
+            result.WithParsed(p =>
             {
-                Messages.WriteError("Please, write a file name with extension. (Example: Vam.exe testText.txt)");
-                Messages.WriteREADME();
-                return;
-            }
-            // если пользователь хочет открыть более одного файла
-            else if (args.Length > 1)
-            {
-                Messages.WriteError("Please, write one file name.");
-                Messages.WriteREADME();
-                return;
-            }
-            #endregion
+                // если была набрана команда --cat
+                if (p.Cat.Count() > 0)
+                {
+                    foreach (var file in p.Cat)
+                    {
+                        var fullPathToFile = WorkWithFiles.GetPathToFile(file); // получение полного пути до файла
+                        bool fileExists = File.Exists(fullPathToFile); // существует ли файл?
+                        if (fileExists)
+                        {
+                            Console.WriteLine(WorkWithFiles.ReadAllFile(file));
+                        }
+                    }
+                }
+                // если была набрана команда --vam
+                else if (p.Vam != null)
+                {
+                    var fullPathToFile = WorkWithFiles.GetPathToFile(p.Vam); // получение полного пути до файла
+                    bool isFileExists = File.Exists(fullPathToFile); // существует ли файл?
 
-            #region GetPathToFile
-            var userPathToFile = args[0];
-            var pathToFile = WorkWithFiles.GetPathToFile(userPathToFile);
-            Console.WriteLine($"Path to file: {pathToFile}");
-            #endregion
-
-            #region Is Command Argument Valid
-
-            #endregion
+                }
+            });
             //var file = WorkWithFiles.GetFile(pathToFile);
         }
     }
