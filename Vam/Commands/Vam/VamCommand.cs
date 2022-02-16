@@ -11,6 +11,7 @@ namespace Vam.Commands
 {
     public class VamCommand
     {
+        private static List<StringBuilder> splitContentStringBulder = new List<StringBuilder>();
         private static int maxWidth = 120;
         private static int maxHeight = 120;
         public static void Do(string path)
@@ -26,9 +27,14 @@ namespace Vam.Commands
             var content = WorkWithFiles.ReadAllFile(fullPathToFile); // получаем содержимое файла
 
             var splitContent = content.Split('\n');
+            // для удобства редактирвоания текста конвертируем все строки в StringBuilder
+            foreach (var row in splitContent)
+            {
+                splitContentStringBulder.Add(new StringBuilder(row));
+            }
+
             var lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
             // если необходимо - увеличиваем буфер по горизонтали
-            Console.WriteLine(lengthOfLongestRow);
             if (lengthOfLongestRow > Console.BufferWidth)
             {
                 var diffBtwMaxLengthAndMaxWidth = maxWidth - lengthOfLongestRow; // разница между максимальной шириной окна и длиной наиболее длинной строки
@@ -45,12 +51,31 @@ namespace Vam.Commands
             
             var currentKey = Console.ReadKey(true); // принимаем первый введенный пользователем символ
             // пока не подана команда на остановку редактирования, исполняем команды пользователя
-            while (currentKey.Modifiers != terminateCommand.Modifiers || currentKey.Key != currentKey.Key)
+            while (currentKey.Modifiers != terminateCommand.Modifiers || terminateCommand.Key != currentKey.Key)
             {
-                // если пользователь нажал на стрелку вверх
                 switch (currentKey.Key)
                 {
                     case ConsoleKey.Backspace:
+                        var row = Console.CursorTop;
+                        var col = Console.CursorLeft;
+                        var rowInList = row - startCursorPosition.Top;
+                        // если индекс находится вне строки (строка короче предыдущей строки), то просто перемещаем курсор пользователя
+                        if (splitContentStringBulder[rowInList].Length - 1 < col - 1 && col - 1 > 0)
+                        {
+                            Console.CursorLeft -= 1;
+                        }
+                        // если существует индекс, идущей перед текущим символом, значит можно его удалить
+                        else if (col - 1 >= 0)
+                        {
+                            splitContentStringBulder[rowInList].Remove(col - 1, 1);
+                            Console.CursorLeft = 0;
+                            Console.CursorTop = row;
+                            Console.Write(GetOnlySpacebarsString());
+                            Console.CursorLeft = 0;
+                            Console.CursorTop = row;
+                            Console.Write(splitContentStringBulder[rowInList]);
+                            Console.SetCursorPosition(col - 1 < 0 ? 0 : col - 1, row);
+                        }
                         break;
                     case ConsoleKey.Enter:
                         break;
@@ -91,75 +116,40 @@ namespace Vam.Commands
                     case ConsoleKey.Delete:
                         break;
                     case ConsoleKey.D0:
-                        break;
                     case ConsoleKey.D1:
-                        break;
                     case ConsoleKey.D2:
-                        break;
                     case ConsoleKey.D3:
-                        break;
                     case ConsoleKey.D4:
-                        break;
                     case ConsoleKey.D5:
-                        break;
                     case ConsoleKey.D6:
-                        break;
                     case ConsoleKey.D7:
-                        break;
                     case ConsoleKey.D8:
-                        break;
                     case ConsoleKey.D9:
-                        break;
                     case ConsoleKey.A:
-                        break;
                     case ConsoleKey.B:
-                        break;
                     case ConsoleKey.C:
-                        break;
                     case ConsoleKey.D:
-                        break;
                     case ConsoleKey.E:
-                        break;
                     case ConsoleKey.F:
-                        break;
                     case ConsoleKey.G:
-                        break;
                     case ConsoleKey.H:
-                        break;
                     case ConsoleKey.I:
-                        break;
                     case ConsoleKey.J:
-                        break;
                     case ConsoleKey.K:
-                        break;
                     case ConsoleKey.L:
-                        break;
                     case ConsoleKey.M:
-                        break;
                     case ConsoleKey.N:
-                        break;
                     case ConsoleKey.O:
-                        break;
                     case ConsoleKey.P:
-                        break;
                     case ConsoleKey.Q:
-                        break;
                     case ConsoleKey.R:
-                        break;
                     case ConsoleKey.S:
-                        break;
                     case ConsoleKey.T:
-                        break;
                     case ConsoleKey.U:
-                        break;
                     case ConsoleKey.V:
-                        break;
                     case ConsoleKey.W:
-                        break;
                     case ConsoleKey.X:
-                        break;
                     case ConsoleKey.Y:
-                        break;
                     case ConsoleKey.Z:
                         break;
                     case ConsoleKey.Multiply:
@@ -178,6 +168,20 @@ namespace Vam.Commands
                 currentKey = Console.ReadKey(true); // получаем следующий введенный пользователем символ
             }
             Console.SetCursorPosition(endCursorPosition.Left, endCursorPosition.Top); // ставим курсор на строку после выведенного текста
+        }
+        /// <summary>
+        /// Возвращает строку-заполнитель, состоящую из пробелов.
+        /// Применяется для очищения экрана перед показом обновленной строки.
+        /// </summary>
+        /// <returns></returns>
+        private static string GetOnlySpacebarsString()
+        {
+            var result = new StringBuilder();
+            for (int i = 0; i < Console.BufferWidth; i++)
+            {
+                result.Append(" ");
+            }
+            return result.ToString();
         }
     }
 }
