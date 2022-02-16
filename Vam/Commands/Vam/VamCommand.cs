@@ -60,8 +60,20 @@ namespace Vam.Commands
                         var row = Console.CursorTop;
                         var col = Console.CursorLeft;
                         var rowInList = row - startCursorPosition.Top;
+                        var previousRowInList = rowInList - 1;
+                        // если при нажатии клавиши BackSpace курсор находился на левом краю консоли и если курсор не находится в первой строке, то необходимо 
+                        if (col - 1 < 0 && previousRowInList >= 0)
+                        {
+                            var currentStr = DeleteEscapeSequenceFromString(splitContentStringBulder[rowInList].ToString());
+                            var previousStr = splitContentStringBulder[previousRowInList];
+                            var previousStrLen = previousStr.Length;
+                            splitContentStringBulder[previousRowInList].Append(DeleteEscapeSequenceFromString(currentStr.ToString())); // переносим содержимое текущей строки на предыдущую строку
+                            splitContentStringBulder.RemoveAt(rowInList); // удаляем текущую строку из списка
+                            ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
+                            RenderRows(previousRowInList, splitContentStringBulder.Count, row - 1, previousStrLen); // перерендериваем все строки
+                        }
                         // если индекс находится вне строки (строка короче предыдущей строки), то просто перемещаем курсор пользователя
-                        if (splitContentStringBulder[rowInList].Length - 1 < col - 1 && col - 1 >= 0)
+                        else if (splitContentStringBulder[rowInList].Length - 1 < col - 1 && col - 1 >= 0)
                         {
                             Console.CursorLeft -= 1;
                         }
@@ -69,20 +81,13 @@ namespace Vam.Commands
                         else if (col - 1 >= 0)
                         {
                             splitContentStringBulder[rowInList].Remove(col - 1, 1);
-                            Console.CursorLeft = 0;
-                            Console.CursorTop = row;
-                            Console.Write(GetOnlySpacebarsString());
-                            Console.CursorLeft = 0;
-                            Console.CursorTop = row;
-                            Console.Write(splitContentStringBulder[rowInList]);
+                            RenderRows(rowInList, rowInList + 1, row, col - 1);
                             Console.SetCursorPosition(col - 1 < 0 ? 0 : col - 1, row);
                         }
                         break;
                     case ConsoleKey.Enter:
                         break;
                     case ConsoleKey.Escape:
-                        break;
-                    case ConsoleKey.Spacebar:
                         break;
                     case ConsoleKey.LeftArrow:
                         // если курсор не выходит за пределы экрана
@@ -115,7 +120,9 @@ namespace Vam.Commands
                     case ConsoleKey.Insert:
                         break;
                     case ConsoleKey.Delete:
+
                         break;
+                    case ConsoleKey.Spacebar:
                     case ConsoleKey.D0:
                     case ConsoleKey.D1:
                     case ConsoleKey.D2:
@@ -152,17 +159,11 @@ namespace Vam.Commands
                     case ConsoleKey.X:
                     case ConsoleKey.Y:
                     case ConsoleKey.Z:
-                        break;
                     case ConsoleKey.Multiply:
-                        break;
                     case ConsoleKey.Add:
-                        break;
                     case ConsoleKey.Separator:
-                        break;
                     case ConsoleKey.Subtract:
-                        break;
                     case ConsoleKey.Decimal:
-                        break;
                     case ConsoleKey.Divide:
                         break;
                 }
@@ -175,7 +176,7 @@ namespace Vam.Commands
         /// Применяется для очищения экрана перед показом обновленной строки.
         /// </summary>
         /// <returns></returns>
-        private static string GetOnlySpacebarsString()
+        private static string GetOnlySpacebarsRow()
         {
             var result = new StringBuilder();
             for (int i = 0; i < Console.BufferWidth; i++)
@@ -183,6 +184,45 @@ namespace Vam.Commands
                 result.Append(" ");
             }
             return result.ToString();
+        }
+        /// <summary>
+        /// Увеличивает ширину буфера, если переданная в качестве аргумента строка больше, чем текущая ширина.
+        /// </summary>
+        private static void ChangeBufferSizeIfNecessary(string row)
+        {
+            if (row.Length > Console.BufferWidth)
+            {
+                Console.BufferWidth = row.Length;
+            }
+        }
+        private static void RenderRows(int startIndex, int endIndex, int startTop, int startLeft)
+        {
+            int currentTop = startTop;
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                Console.CursorLeft = 0;
+                Console.CursorTop = currentTop;
+                Console.Write(GetOnlySpacebarsRow());
+
+                Console.CursorLeft = 0;
+                Console.CursorTop = currentTop;
+                // выводим строку-заполнитель, если закончились строки в массиве
+                if (i >= splitContentStringBulder.Count)
+                {
+                    Console.Write(GetOnlySpacebarsRow());
+                }
+                // в противном случае выводим строку из массива
+                else
+                {
+                    Console.Write(DeleteEscapeSequenceFromString(splitContentStringBulder[i].ToString()));
+                }
+                currentTop++;
+            }
+            Console.SetCursorPosition(startLeft, startTop);
+        }
+        private static string DeleteEscapeSequenceFromString(string source)
+        {
+            return source.Replace("\n", "").Replace("\r", "");
         }
     }
 }

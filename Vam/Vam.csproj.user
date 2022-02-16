@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>--vam C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\bin\Debug\dir1\dir2\Vam.csproj</StartArguments>
+    <StartArguments>--vam C:\Users\Stupid_Guy\Documents\GitHub\Vam\Vam\bin\Debug\dir1\dir2\someRows.txt</StartArguments>
   </PropertyGroup>
 </Project>
