@@ -45,6 +45,7 @@ namespace Vam.Commands
             
             Console.WriteLine(content); // выводим содержание файла на экран
             var endCursorPosition = new { Left = Console.CursorLeft, Top = Console.CursorTop }; // самая левая позиция курсора после вывода файла
+            Console.WindowHeight += 1; // увеличиваем высоту окна на 1 линию (иначе ломается)
             Console.SetCursorPosition(startCursorPosition.Left, startCursorPosition.Top); // устанавливаем курсор на начало файла
             
             var terminateCommand = new ConsoleKeyInfo('D', ConsoleKey.D, false, false, true); // команда завершения работы - Ctrl + D
@@ -60,7 +61,7 @@ namespace Vam.Commands
                         var col = Console.CursorLeft;
                         var rowInList = row - startCursorPosition.Top;
                         // если индекс находится вне строки (строка короче предыдущей строки), то просто перемещаем курсор пользователя
-                        if (splitContentStringBulder[rowInList].Length - 1 < col - 1 && col - 1 > 0)
+                        if (splitContentStringBulder[rowInList].Length - 1 < col - 1 && col - 1 >= 0)
                         {
                             Console.CursorLeft -= 1;
                         }
