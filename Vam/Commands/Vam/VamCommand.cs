@@ -64,6 +64,12 @@ namespace Vam.Commands
                         // если при нажатии клавиши BackSpace курсор находился на левом краю консоли и если курсор не находится в первой строке, то необходимо 
                         if (col - 1 < 0 && previousRowInList >= 0)
                         {
+                            if (splitContentStringBulder.Count - 1 < rowInList)
+                            {
+                                Console.CursorLeft = 0;
+                                Console.CursorTop -= 1;
+                                break;
+                            }
                             var currentStr = DeleteEscapeSequenceFromString(splitContentStringBulder[rowInList].ToString());
                             var previousStr = splitContentStringBulder[previousRowInList];
                             var previousStrLen = previousStr.Length;
@@ -71,6 +77,10 @@ namespace Vam.Commands
                             splitContentStringBulder.RemoveAt(rowInList); // удаляем текущую строку из списка
                             ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
                             RenderRows(previousRowInList, splitContentStringBulder.Count, row - 1, previousStrLen); // перерендериваем все строки
+                        }
+                        else if (splitContentStringBulder.Count - 1 < rowInList && col - 1 >= 0)
+                        {
+                            Console.CursorLeft -= 1;
                         }
                         // если индекс находится вне строки (строка короче предыдущей строки), то просто перемещаем курсор пользователя
                         else if (splitContentStringBulder[rowInList].Length - 1 < col - 1 && col - 1 >= 0)
@@ -165,6 +175,26 @@ namespace Vam.Commands
                     case ConsoleKey.Subtract:
                     case ConsoleKey.Decimal:
                     case ConsoleKey.Divide:
+                        row = Console.CursorTop;
+                        col = Console.CursorLeft;
+                        rowInList = row - startCursorPosition.Top;
+                        var currentRowStrBld = splitContentStringBulder[rowInList];
+                        // если символ необходимо вставить внутри строки
+                        if (col < currentRowStrBld.Length)
+                        {
+                            currentRowStrBld.Insert(col, currentKey.KeyChar);
+                        }
+                        else
+                        {
+                            var distanceBetweenLastSymbolAndCurrentPosition = col - currentRowStrBld.Length;
+                            for (int i = 0; i < distanceBetweenLastSymbolAndCurrentPosition; i++)
+                            {
+                                currentRowStrBld.Append(' ');
+                            }
+                            currentRowStrBld.Append(currentKey.KeyChar);
+                        }
+                        ChangeBufferSizeIfNecessary(currentRowStrBld.ToString());
+                        RenderRows(rowInList, splitContentStringBulder.Count, row, col + 2);
                         break;
                 }
                 currentKey = Console.ReadKey(true); // получаем следующий введенный пользователем символ
@@ -218,6 +248,7 @@ namespace Vam.Commands
                 }
                 currentTop++;
             }
+            startLeft = startLeft - 1 < 0 ? startLeft : startLeft - 1;
             Console.SetCursorPosition(startLeft, startTop);
         }
         private static string DeleteEscapeSequenceFromString(string source)
