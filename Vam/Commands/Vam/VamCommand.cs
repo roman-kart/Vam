@@ -54,13 +54,13 @@ namespace Vam.Commands
             // пока не подана команда на остановку редактирования, исполняем команды пользователя
             while (currentKey.Modifiers != terminateCommand.Modifiers || terminateCommand.Key != currentKey.Key)
             {
+                var row = Console.CursorTop;
+                var col = Console.CursorLeft;
+                var rowInList = row - startCursorPosition.Top;
+                var previousRowInList = rowInList - 1;
                 switch (currentKey.Key)
                 {
                     case ConsoleKey.Backspace:
-                        var row = Console.CursorTop;
-                        var col = Console.CursorLeft;
-                        var rowInList = row - startCursorPosition.Top;
-                        var previousRowInList = rowInList - 1;
                         // если при нажатии клавиши BackSpace курсор находился на левом краю консоли и если курсор не находится в первой строке, то необходимо 
                         if (col - 1 < 0 && previousRowInList >= 0)
                         {
@@ -75,8 +75,9 @@ namespace Vam.Commands
                             var previousStrLen = previousStr.Length;
                             splitContentStringBulder[previousRowInList].Append(DeleteEscapeSequenceFromString(currentStr.ToString())); // переносим содержимое текущей строки на предыдущую строку
                             splitContentStringBulder.RemoveAt(rowInList); // удаляем текущую строку из списка
+                            endCursorPosition = new { Left = endCursorPosition.Left, Top = endCursorPosition.Top - 1 };
                             ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
-                            RenderRows(previousRowInList, splitContentStringBulder.Count, row - 1, previousStrLen); // перерендериваем все строки
+                            RenderRows(previousRowInList, splitContentStringBulder.Count + 1, row - 1, previousStrLen); // перерендериваем все строки
                         }
                         else if (splitContentStringBulder.Count - 1 < rowInList && col - 1 >= 0)
                         {
@@ -96,6 +97,35 @@ namespace Vam.Commands
                         }
                         break;
                     case ConsoleKey.Enter:
+                        // если курсор ниже предела текущего массива - создаем новые строчки до этого положения
+                        if (rowInList > splitContentStringBulder.Count - 1)
+                        {
+                            var countOfOnlySpacesRowsBeforeNewRow = rowInList - (splitContentStringBulder.Count - 1);
+                            // вставляем пустые строки до новой строки + новую строку
+                            InsertSpacesRowsToSplitRowsList(splitContentStringBulder.Count - 1, countOfOnlySpacesRowsBeforeNewRow + 1);
+                        }
+                        // если курсор находится в пределах текущего массива строк - переносим содержимое (если есть) справа от курсора на новую строку
+                        else if (rowInList >= 0 && rowInList <= splitContentStringBulder.Count - 1)
+                        {
+                            var currentStrBld = splitContentStringBulder[rowInList];
+                            var newRowStrBld = new StringBuilder();
+                            // если курсор находится вне пределов текущей строчки, то на новую строку ничего не переносим
+                            if (col > currentStrBld.Length - 1)
+                            {
+                                // не изменяем новую строку
+                            }
+                            else
+                            {
+                                var newRowStr = currentStrBld.ToString().Substring(col);
+                                currentStrBld = currentStrBld.Remove(col, currentStrBld.Length - col);
+                                newRowStr = DeleteEscapeSequenceFromString(newRowStr);
+                                newRowStrBld.Append(newRowStr);
+                            }
+                            splitContentStringBulder.Insert(rowInList + 1, newRowStrBld);
+                            endCursorPosition = new {Left = endCursorPosition.Left, Top = endCursorPosition.Top + 1};
+                            RenderRows(rowInList, splitContentStringBulder.Count, row, 0);
+                            Console.CursorTop++;
+                        }
                         break;
                     case ConsoleKey.Escape:
                         break;
@@ -130,54 +160,8 @@ namespace Vam.Commands
                     case ConsoleKey.Insert:
                         break;
                     case ConsoleKey.Delete:
-
                         break;
-                    case ConsoleKey.Spacebar:
-                    case ConsoleKey.D0:
-                    case ConsoleKey.D1:
-                    case ConsoleKey.D2:
-                    case ConsoleKey.D3:
-                    case ConsoleKey.D4:
-                    case ConsoleKey.D5:
-                    case ConsoleKey.D6:
-                    case ConsoleKey.D7:
-                    case ConsoleKey.D8:
-                    case ConsoleKey.D9:
-                    case ConsoleKey.A:
-                    case ConsoleKey.B:
-                    case ConsoleKey.C:
-                    case ConsoleKey.D:
-                    case ConsoleKey.E:
-                    case ConsoleKey.F:
-                    case ConsoleKey.G:
-                    case ConsoleKey.H:
-                    case ConsoleKey.I:
-                    case ConsoleKey.J:
-                    case ConsoleKey.K:
-                    case ConsoleKey.L:
-                    case ConsoleKey.M:
-                    case ConsoleKey.N:
-                    case ConsoleKey.O:
-                    case ConsoleKey.P:
-                    case ConsoleKey.Q:
-                    case ConsoleKey.R:
-                    case ConsoleKey.S:
-                    case ConsoleKey.T:
-                    case ConsoleKey.U:
-                    case ConsoleKey.V:
-                    case ConsoleKey.W:
-                    case ConsoleKey.X:
-                    case ConsoleKey.Y:
-                    case ConsoleKey.Z:
-                    case ConsoleKey.Multiply:
-                    case ConsoleKey.Add:
-                    case ConsoleKey.Separator:
-                    case ConsoleKey.Subtract:
-                    case ConsoleKey.Decimal:
-                    case ConsoleKey.Divide:
-                        row = Console.CursorTop;
-                        col = Console.CursorLeft;
-                        rowInList = row - startCursorPosition.Top;
+                    default:
                         var currentRowStrBld = splitContentStringBulder[rowInList];
                         // если символ необходимо вставить внутри строки
                         if (col < currentRowStrBld.Length)
@@ -194,7 +178,7 @@ namespace Vam.Commands
                             currentRowStrBld.Append(currentKey.KeyChar);
                         }
                         ChangeBufferSizeIfNecessary(currentRowStrBld.ToString());
-                        RenderRows(rowInList, splitContentStringBulder.Count, row, col + 2);
+                        RenderRows(rowInList, rowInList + 1, row, col + 2); // рендерим данную строку
                         break;
                 }
                 currentKey = Console.ReadKey(true); // получаем следующий введенный пользователем символ
@@ -254,6 +238,23 @@ namespace Vam.Commands
         private static string DeleteEscapeSequenceFromString(string source)
         {
             return source.Replace("\n", "").Replace("\r", "");
+        }
+        /// <summary>
+        /// Добавляет в указанном диапазоне пустые строки в массив строк.
+        /// startIndex - включительно.
+        /// endIndex - не включительно.
+        /// </summary>
+        /// <param name="startIndex"></param>
+        /// <param name="endIndex"></param>
+        private static void InsertSpacesRowsToSplitRowsList(int startIndex, int count)
+        {
+            var onlySpacesString = GetOnlySpacebarsRow();
+            var onlySpacesStringsList = new List<StringBuilder>();
+            for (int i = 0; i < count; i++)
+            {
+                onlySpacesStringsList.Add(new StringBuilder(onlySpacesString));
+            }
+            splitContentStringBulder.InsertRange(startIndex, onlySpacesStringsList);
         }
     }
 }
