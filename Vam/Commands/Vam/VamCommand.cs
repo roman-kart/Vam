@@ -161,7 +161,14 @@ namespace Vam.Commands
                         break;
                     case ConsoleKey.Delete:
                         break;
+                    // для всех остальных клавишь просто добавляем значение символа в текущую строку
                     default:
+                        if (rowInList > splitContentStringBulder.Count - 1)
+                        {
+                            var countOfOnlySpacesRowsBeforeNewRow = rowInList - (splitContentStringBulder.Count - 1);
+                            // вставляем пустые строки до новой строки + новую строку
+                            InsertSpacesRowsToSplitRowsList(splitContentStringBulder.Count - 1, countOfOnlySpacesRowsBeforeNewRow + 1);
+                        }
                         var currentRowStrBld = splitContentStringBulder[rowInList];
                         // если символ необходимо вставить внутри строки
                         if (col < currentRowStrBld.Length)
