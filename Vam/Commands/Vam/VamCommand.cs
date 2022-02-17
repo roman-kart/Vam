@@ -127,8 +127,6 @@ namespace Vam.Commands
                             Console.CursorTop++;
                         }
                         break;
-                    case ConsoleKey.Escape:
-                        break;
                     case ConsoleKey.LeftArrow:
                         // если курсор не выходит за пределы экрана
                         if (NavigationCheck.IsCursorInBuffer(leftDifference: -1))
@@ -157,10 +155,28 @@ namespace Vam.Commands
                             Console.CursorTop += 1;
                         }
                         break;
+
+                    // функциональные клавиши, для которых пока нет реализации
+
                     case ConsoleKey.Insert:
-                        break;
                     case ConsoleKey.Delete:
+                    case ConsoleKey.Escape:
+                    case ConsoleKey.Applications:
+                    case ConsoleKey.Attention:
+                    case ConsoleKey.BrowserBack:
+                    case ConsoleKey.BrowserForward:
+                    case ConsoleKey.BrowserHome:
+                    case ConsoleKey.BrowserFavorites:
+                    case ConsoleKey.BrowserRefresh:
+                    case ConsoleKey.BrowserSearch:
+                    case ConsoleKey.BrowserStop:
+                    case ConsoleKey.Clear:
+                    case ConsoleKey.CrSel:
+                    case ConsoleKey.EraseEndOfFile:
+                    case ConsoleKey.Execute:
+                    case ConsoleKey.ExSel:
                         break;
+
                     // для всех остальных клавишь просто добавляем значение символа в текущую строку
                     default:
                         // добавляем пустые строки, если пользователь ввел симвом вне пределов массива строк
@@ -185,8 +201,19 @@ namespace Vam.Commands
                             }
                             currentRowStrBld.Append(currentKey.KeyChar);
                         }
-                        ChangeBufferSizeIfNecessary(currentRowStrBld.ToString());
-                        RenderRows(rowInList, rowInList + 1, row, col + 2); // рендерим данную строку
+                        // (пока рендеим только одну) если размер буфера был увеличен - рендерим все строчки
+                        if (ChangeBufferSizeIfNecessary(currentRowStrBld.ToString()))
+                        {
+                            RenderRows(rowInList, rowInList + 1, row, col + 2); // рендерим данную строку
+                            //RenderRows(0, splitContentStringBulder.Count, 0, 0);
+                            //Console.CursorTop = row;
+                            //Console.CursorLeft = col;
+                        }
+                        // иначе только одну
+                        else
+                        {
+                            RenderRows(rowInList, rowInList + 1, row, col + 2); // рендерим данную строку
+                        }
                         break;
                 }
                 currentKey = Console.ReadKey(true); // получаем следующий введенный пользователем символ
@@ -209,13 +236,16 @@ namespace Vam.Commands
         }
         /// <summary>
         /// Увеличивает ширину буфера, если переданная в качестве аргумента строка больше, чем текущая ширина.
+        /// true - если размер был увеличен, false - если остался прежним
         /// </summary>
-        private static void ChangeBufferSizeIfNecessary(string row)
+        private static bool ChangeBufferSizeIfNecessary(string row)
         {
             if (row.Length > Console.BufferWidth)
             {
                 Console.BufferWidth = row.Length;
+                return true;
             }
+            return false;
         }
         private static void RenderRows(int startIndex, int endIndex, int startTop, int startLeft)
         {
