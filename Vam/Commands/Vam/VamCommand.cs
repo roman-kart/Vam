@@ -163,6 +163,7 @@ namespace Vam.Commands
                         break;
                     // для всех остальных клавишь просто добавляем значение символа в текущую строку
                     default:
+                        // добавляем пустые строки, если пользователь ввел симвом вне пределов массива строк
                         if (rowInList > splitContentStringBulder.Count - 1)
                         {
                             var countOfOnlySpacesRowsBeforeNewRow = rowInList - (splitContentStringBulder.Count - 1);
