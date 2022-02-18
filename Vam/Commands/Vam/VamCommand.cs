@@ -36,6 +36,8 @@ namespace Vam.Commands
         /// Длина самой длинной строки в текущем файле.
         /// </summary>
         private static int lengthOfLongestRow;
+        private static CursorPosition startCursorPosition;
+        private static CursorPosition endCursorPosition;
         public static void Do(string path)
         {
             #region получение пути файла и содержимого файла
@@ -52,12 +54,14 @@ namespace Vam.Commands
             }
             #endregion
 
+            #region первоначальная настройка окна консоли
             lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
             ChangeBufferSizeIfNecessary(lengthOfLongestRow);
-            var startCursorPosition = new { Left = Console.CursorLeft, Top = Console.CursorTop}; // позиция курсора до вывода файла
+            startCursorPosition = new CursorPosition() { Left = Console.CursorLeft, Top = Console.CursorTop }; // позиция курсора до вывода файла
+            #endregion
 
             RenderRows(0, splitContentStringBulder.Count, startCursorPosition.Top, 0);
-            var endCursorPosition = new { Left = 0, Top = startCursorPosition.Top + splitContentStringBulder.Count}; // самая левая позиция курсора после вывода файла
+            endCursorPosition = new CursorPosition() { Left = 0, Top = startCursorPosition.Top + splitContentStringBulder.Count}; // самая левая позиция курсора после вывода файла
             Console.WindowHeight += 1; // увеличиваем высоту окна на 1 линию (иначе ломается)
             Console.SetCursorPosition(startCursorPosition.Left, startCursorPosition.Top); // устанавливаем курсор на начало файла
             
@@ -96,7 +100,7 @@ namespace Vam.Commands
                                 var previousStrLen = previousStr.Length;
                                 splitContentStringBulder[previousRowInList].Append(DeleteEscapeSequenceFromString(currentStr.ToString())); // переносим содержимое текущей строки на предыдущую строку
                                 splitContentStringBulder.RemoveAt(rowInList); // удаляем текущую строку из списка
-                                endCursorPosition = new { Left = endCursorPosition.Left, Top = endCursorPosition.Top - 1 };
+                                endCursorPosition = new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top - 1 };
                                 ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
                                 RenderRows(previousRowInList, splitContentStringBulder.Count + 1, row - 1, previousStrLen); // перерендериваем все строки
                             }
@@ -143,7 +147,7 @@ namespace Vam.Commands
                                     newRowStrBld.Append(newRowStr);
                                 }
                                 splitContentStringBulder.Insert(rowInList + 1, newRowStrBld);
-                                endCursorPosition = new { Left = endCursorPosition.Left, Top = endCursorPosition.Top + 1 };
+                                endCursorPosition =  new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top + 1 };
                                 RenderRows(rowInList, splitContentStringBulder.Count, row, 0);
                                 Console.CursorTop++;
                             }
