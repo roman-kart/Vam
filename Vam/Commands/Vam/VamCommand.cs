@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vam.Files;
 using Vam.Commands.Vam;
+using System.Threading;
 
 namespace Vam.Commands
 {
@@ -21,9 +22,9 @@ namespace Vam.Commands
             // слздаем новый файл, если файла не существует
             if (!isFileExists)
             {
-                File.Create(fullPathToFile);
+                var file = File.Create(fullPathToFile); // создаем файл
+                file.Close(); // и освобождаем его
             }
-
             var content = WorkWithFiles.ReadAllFile(fullPathToFile); // получаем содержимое файла
 
             var splitContent = content.Split('\n');
@@ -42,9 +43,9 @@ namespace Vam.Commands
                 Console.BufferWidth = lengthOfLongestRow; // увеличиваем буфер на размер длины максимальной по длине строки
             }
             var startCursorPosition = new { Left = Console.CursorLeft, Top = Console.CursorTop}; // позиция курсора до вывода файла
-            
-            Console.WriteLine(content); // выводим содержание файла на экран
-            var endCursorPosition = new { Left = Console.CursorLeft, Top = Console.CursorTop }; // самая левая позиция курсора после вывода файла
+
+            RenderRows(0, splitContentStringBulder.Count, startCursorPosition.Top, 0);
+            var endCursorPosition = new { Left = 0, Top = startCursorPosition.Top + splitContentStringBulder.Count}; // самая левая позиция курсора после вывода файла
             Console.WindowHeight += 1; // увеличиваем высоту окна на 1 линию (иначе ломается)
             Console.SetCursorPosition(startCursorPosition.Left, startCursorPosition.Top); // устанавливаем курсор на начало файла
             
@@ -183,6 +184,7 @@ namespace Vam.Commands
                         case ConsoleKey.EraseEndOfFile:
                         case ConsoleKey.Execute:
                         case ConsoleKey.ExSel:
+                        case ConsoleKey.Tab:
                             break;
 
                         // для всех остальных клавишь просто добавляем значение символа в текущую строку
@@ -212,10 +214,9 @@ namespace Vam.Commands
                             // (пока рендеим только одну) если размер буфера был увеличен - рендерим все строчки
                             if (ChangeBufferSizeIfNecessary(currentRowStrBld.ToString()))
                             {
-                                RenderRows(rowInList, rowInList + 1, row, col + 2); // рендерим данную строку
-                                                                                    //RenderRows(0, splitContentStringBulder.Count, 0, 0);
-                                                                                    //Console.CursorTop = row;
-                                                                                    //Console.CursorLeft = col;
+                                RenderRows(0, splitContentStringBulder.Count, 0, 0);
+                                Console.CursorTop = row;
+                                Console.CursorLeft = col + 1;
                             }
                             // иначе только одну
                             else
@@ -279,7 +280,7 @@ namespace Vam.Commands
                 }
                 currentTop++;
             }
-            startLeft = startLeft - 1 < 0 ? startLeft : startLeft - 1;
+            startLeft = startLeft - 1 < 0 ? startLeft : startLeft - 1; // курсор перемещается влево, так как это было необходимо для Backspace
             Console.SetCursorPosition(startLeft, startTop);
         }
         private static string DeleteEscapeSequenceFromString(string source)
