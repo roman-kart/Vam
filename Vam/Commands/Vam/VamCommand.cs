@@ -10,29 +10,43 @@ using System.Threading;
 
 namespace Vam.Commands
 {
-    public class VamCommand
+    /// <summary>
+    /// Содержит методы для реализации функционала блокнота в консоли.
+    /// Все методы статические, так как предполагается, что не понадобится вызывать более одного метода.
+    /// </summary>
+    public static class VamCommand
     {
+        /// <summary>
+        /// Содержимое файла, поделенное на строки. Каждая строка хранится в отдельном экземпляре StringBuilder
+        /// </summary>
         private static List<StringBuilder> splitContentStringBulder = new List<StringBuilder>();
+        /// <summary>
+        /// Максимальная ширина терминала
+        /// </summary>
         private static int maxWidth = 120;
+        /// <summary>
+        /// Максимальная высота терминала
+        /// </summary>
         private static int maxHeight = 120;
+        /// <summary>
+        /// Полный путь до файла
+        /// </summary>
+        private static string fullPathToFile;
         public static void Do(string path)
         {
-            var fullPathToFile = WorkWithFiles.GetPathToFile(path); // получение полного пути до файла
-            bool isFileExists = File.Exists(fullPathToFile); // существует ли файл
-            // слздаем новый файл, если файла не существует
-            if (!isFileExists)
-            {
-                var file = File.Create(fullPathToFile); // создаем файл
-                file.Close(); // и освобождаем его
-            }
+            #region получение пути файла и содержимого файла
+            fullPathToFile = WorkWithFiles.CreateNewFileIfNecessaryThenGetFullPath(path); // получаем полный путь до файла
             var content = WorkWithFiles.ReadAllFile(fullPathToFile); // получаем содержимое файла
+            #endregion
 
-            var splitContent = content.Split('\n');
+            #region форматируем исходные данные
+            var splitContent = content.Split('\n'); // получаем отдельные строки вместо одной строки
             // для удобства редактирвоания текста конвертируем все строки в StringBuilder
             foreach (var row in splitContent)
             {
                 splitContentStringBulder.Add(new StringBuilder(row));
             }
+            #endregion
 
             var lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
             // если необходимо - увеличиваем буфер по горизонтали

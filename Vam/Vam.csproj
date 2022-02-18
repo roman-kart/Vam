@@ -80,7 +80,6 @@
     <Compile Include="Commands\OptionsCommandLine.cs" />
     <Compile Include="Commands\Vam\VamCommand.cs" />
     <Compile Include="Commands\Vam\WorkWithFileContent.cs" />
-    <Compile Include="Files\File.cs" />
     <Compile Include="Files\WorkWithFiles.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
