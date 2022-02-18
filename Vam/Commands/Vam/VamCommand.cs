@@ -60,7 +60,7 @@ namespace Vam.Commands
             startCursorPosition = new CursorPosition() { Left = Console.CursorLeft, Top = Console.CursorTop }; // позиция курсора до вывода файла
             #endregion
 
-            RenderRows(0, splitContentStringBulder.Count, startCursorPosition.Top, 0);
+            RenderRows(0, splitContentStringBulder.Count, startCursorPosition.Top, 0, 0);
             endCursorPosition = new CursorPosition() { Left = 0, Top = startCursorPosition.Top + splitContentStringBulder.Count}; // самая левая позиция курсора после вывода файла
             Console.WindowHeight += 1; // увеличиваем высоту окна на 1 линию (иначе ломается)
             Console.SetCursorPosition(startCursorPosition.Left, startCursorPosition.Top); // устанавливаем курсор на начало файла
@@ -102,7 +102,7 @@ namespace Vam.Commands
                                 splitContentStringBulder.RemoveAt(rowInList); // удаляем текущую строку из списка
                                 endCursorPosition = new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top - 1 };
                                 ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
-                                RenderRows(previousRowInList, splitContentStringBulder.Count + 1, row - 1, previousStrLen); // перерендериваем все строки
+                                RenderRows(previousRowInList, splitContentStringBulder.Count + 1, row - 1, previousStrLen, 0); // перерендериваем все строки
                             }
                             else if (splitContentStringBulder.Count - 1 < rowInList && col - 1 >= 0)
                             {
@@ -117,7 +117,7 @@ namespace Vam.Commands
                             else if (col - 1 >= 0)
                             {
                                 splitContentStringBulder[rowInList].Remove(col - 1, 1);
-                                RenderRows(rowInList, rowInList + 1, row, col - 1);
+                                RenderRows(rowInList, rowInList + 1, row, col, -2);
                                 Console.SetCursorPosition(col - 1 < 0 ? 0 : col - 1, row);
                             }
                             break;
@@ -148,7 +148,7 @@ namespace Vam.Commands
                                 }
                                 splitContentStringBulder.Insert(rowInList + 1, newRowStrBld);
                                 endCursorPosition =  new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top + 1 };
-                                RenderRows(rowInList, splitContentStringBulder.Count, row, 0);
+                                RenderRows(rowInList, splitContentStringBulder.Count, row, 0, 0);
                                 Console.CursorTop++;
                             }
                             break;
@@ -230,14 +230,14 @@ namespace Vam.Commands
                             // (пока рендеим только одну) если размер буфера был увеличен - рендерим все строчки
                             if (ChangeBufferSizeIfNecessary(currentRowStrBld.ToString()))
                             {
-                                RenderRows(0, splitContentStringBulder.Count, 0, 0);
+                                RenderRows(0, splitContentStringBulder.Count, 0, 0, 0);
                                 Console.CursorTop = row;
                                 Console.CursorLeft = col + 1;
                             }
                             // иначе только одну
                             else
                             {
-                                RenderRows(rowInList, rowInList + 1, row, col + 2); // рендерим данную строку
+                                RenderRows(rowInList, rowInList + 1, row, col, 1); // рендерим данную строку
                             }
                             break;
                     }
@@ -281,7 +281,7 @@ namespace Vam.Commands
             }
             return false;
         }
-        private static void RenderRows(int startIndex, int endIndex, int startTop, int startLeft)
+        private static void RenderRows(int startIndex, int endIndex, int startTop, int startLeft, int offset)
         {
             int currentTop = startTop;
             for (int i = startIndex; i < endIndex; i++)
@@ -304,7 +304,7 @@ namespace Vam.Commands
                 }
                 currentTop++;
             }
-            startLeft = startLeft - 1 < 0 ? startLeft : startLeft - 1; // курсор перемещается влево, так как это было необходимо для Backspace
+            startLeft = startLeft + offset < 0 ? startLeft : startLeft + offset; // курсор перемещается на определенное пользователем расстояние, если он не выходит за пределы экрана
             Console.SetCursorPosition(startLeft, startTop);
         }
         private static string DeleteEscapeSequenceFromString(string source)
