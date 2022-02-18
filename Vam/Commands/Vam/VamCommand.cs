@@ -206,7 +206,15 @@ namespace Vam.Commands
                         case ConsoleKey.EraseEndOfFile:
                         case ConsoleKey.Execute:
                         case ConsoleKey.ExSel:
+                            break;
+
+                        // клавиши, которые добавляют несколько символов:
                         case ConsoleKey.Tab:
+                            AddOnlySpacesRowsIfNecessary(_lastIndexInSequenceOfRows, rowInList);
+                            var currentRowStrBldTmp = splitContentStringBulder[rowInList];
+                            InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBldTmp, col, col, ' ', ' ', ' ', ' ');
+                            ChangeBufferSizeIfNecessaryThenSetCursorPosition(currentRowStrBldTmp.ToString(), rowInList, new CursorPosition() { Top = row, Left = col });
+                            Console.CursorLeft += 3;
                             break;
 
                         // для всех остальных клавишь просто добавляем значение символа в текущую строку
@@ -216,6 +224,14 @@ namespace Vam.Commands
                             var currentRowStrBld = splitContentStringBulder[rowInList];
                             InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBld, col, col, currentKey.KeyChar);
                             ChangeBufferSizeIfNecessaryThenSetCursorPosition(currentRowStrBld.ToString(), rowInList, new CursorPosition() { Top = row, Left = col });
+                            //InsertSequenceOfSymbolsToStringBuilderWithCheckTemplateMethod(
+                            //    _lastIndexInSequenceOfRows, 
+                            //    row, 
+                            //    rowInList, 
+                            //    col, 
+                            //    col, 
+                            //    currentKey.KeyChar
+                            //    );
                             break;
                     }
                 }
@@ -389,6 +405,21 @@ namespace Vam.Commands
         private static void InsertSequenceOfSymbolsToStringBuilder(StringBuilder sourceStrBld, int indexInsert, string symbols)
         {
             sourceStrBld.Insert(indexInsert, symbols);
+        }
+        private static void InsertSequenceOfSymbolsToStringBuilderWithCheckTemplateMethod(
+            int LastIndexInSequenceOfRows,
+            int currentRow,
+            int RowInList,
+            int currentCol,
+            int insertIndex,
+            params char[] symbols
+            )
+        {
+            // добавляем пустые строки, если пользователь ввел симвом вне пределов массива строк
+            AddOnlySpacesRowsIfNecessary(_lastIndexInSequenceOfRows, RowInList);
+            var currentRowStrBld = splitContentStringBulder[RowInList];
+            InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBld, currentCol, insertIndex, symbols);
+            ChangeBufferSizeIfNecessaryThenSetCursorPosition(currentRowStrBld.ToString(), RowInList, new CursorPosition() { Top = currentRow, Left = currentCol });
         }
     }
 }
