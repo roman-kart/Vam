@@ -32,6 +32,10 @@ namespace Vam.Commands
         /// Полный путь до файла
         /// </summary>
         private static string fullPathToFile;
+        /// <summary>
+        /// Длина самой длинной строки в текущем файле.
+        /// </summary>
+        private static int lengthOfLongestRow;
         public static void Do(string path)
         {
             #region получение пути файла и содержимого файла
@@ -39,7 +43,7 @@ namespace Vam.Commands
             var content = WorkWithFiles.ReadAllFile(fullPathToFile); // получаем содержимое файла
             #endregion
 
-            #region форматируем исходные данные
+            #region форматирование исходных данных
             var splitContent = content.Split('\n'); // получаем отдельные строки вместо одной строки
             // для удобства редактирвоания текста конвертируем все строки в StringBuilder
             foreach (var row in splitContent)
@@ -48,14 +52,8 @@ namespace Vam.Commands
             }
             #endregion
 
-            var lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
-            // если необходимо - увеличиваем буфер по горизонтали
-            if (lengthOfLongestRow > Console.BufferWidth)
-            {
-                var diffBtwMaxLengthAndMaxWidth = maxWidth - lengthOfLongestRow; // разница между максимальной шириной окна и длиной наиболее длинной строки
-                Console.WindowWidth = diffBtwMaxLengthAndMaxWidth <= 0 ? maxWidth : maxWidth - diffBtwMaxLengthAndMaxWidth; // устанавливаем размер окна
-                Console.BufferWidth = lengthOfLongestRow; // увеличиваем буфер на размер длины максимальной по длине строки
-            }
+            lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
+            ChangeBufferSizeIfNecessary(lengthOfLongestRow);
             var startCursorPosition = new { Left = Console.CursorLeft, Top = Console.CursorTop}; // позиция курсора до вывода файла
 
             RenderRows(0, splitContentStringBulder.Count, startCursorPosition.Top, 0);
@@ -264,9 +262,17 @@ namespace Vam.Commands
         /// </summary>
         private static bool ChangeBufferSizeIfNecessary(string row)
         {
-            if (row.Length > Console.BufferWidth)
+            return ChangeBufferSizeIfNecessary(row.Length);
+        }
+        /// <summary>
+        /// Увеличивает ширину буфера, если переданная в качестве аргумента длина строки больше, чем текущая ширина.
+        /// true - если размер был увеличен, false - если остался прежним
+        /// </summary>
+        private static bool ChangeBufferSizeIfNecessary(int rowLength)
+        {
+            if (rowLength > Console.BufferWidth)
             {
-                Console.BufferWidth = row.Length;
+                Console.BufferWidth = rowLength;
                 return true;
             }
             return false;
