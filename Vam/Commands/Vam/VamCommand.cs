@@ -38,6 +38,9 @@ namespace Vam.Commands
         private static int lengthOfLongestRow;
         private static CursorPosition startCursorPosition;
         private static CursorPosition endCursorPosition;
+        private static ConsoleKeyInfo terminateCommand = new ConsoleKeyInfo('D', ConsoleKey.D, false, false, true); // команда завершения работы - Ctrl + D
+        private static int _lastIndexInSequenceOfRows => splitContentStringBulder.Count - 1;
+        private static int _countOfRowsInSequenceOfRows => splitContentStringBulder.Count;
         public static void Do(string path)
         {
             #region получение пути файла и содержимого файла
@@ -58,14 +61,17 @@ namespace Vam.Commands
             lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
             ChangeBufferSizeIfNecessary(lengthOfLongestRow);
             startCursorPosition = new CursorPosition() { Left = Console.CursorLeft, Top = Console.CursorTop }; // позиция курсора до вывода файла
+            endCursorPosition = new CursorPosition() { Left = 0, Top = startCursorPosition.Top + _countOfRowsInSequenceOfRows }; // самая левая позиция курсора после вывода файла
             #endregion
 
-            RenderRows(0, splitContentStringBulder.Count, startCursorPosition.Top, 0, 0);
-            endCursorPosition = new CursorPosition() { Left = 0, Top = startCursorPosition.Top + splitContentStringBulder.Count}; // самая левая позиция курсора после вывода файла
+            #region выводим содержимое файла на экран
+            RenderRows(0, _countOfRowsInSequenceOfRows, startCursorPosition.Top, 0, 0);
+            #endregion
+
+            #region установка размера окна и положения курсора
             Console.WindowHeight += 1; // увеличиваем высоту окна на 1 линию (иначе ломается)
             Console.SetCursorPosition(startCursorPosition.Left, startCursorPosition.Top); // устанавливаем курсор на начало файла
-            
-            var terminateCommand = new ConsoleKeyInfo('D', ConsoleKey.D, false, false, true); // команда завершения работы - Ctrl + D
+            #endregion
             
             var currentKey = Console.ReadKey(true); // принимаем первый введенный пользователем символ
             // пока не подана команда на остановку редактирования, исполняем команды пользователя
@@ -89,7 +95,7 @@ namespace Vam.Commands
                             // если при нажатии клавиши BackSpace курсор находился на левом краю консоли и если курсор не находится в первой строке, то необходимо 
                             if (col - 1 < 0 && previousRowInList >= 0)
                             {
-                                if (splitContentStringBulder.Count - 1 < rowInList)
+                                if (_lastIndexInSequenceOfRows < rowInList)
                                 {
                                     Console.CursorLeft = 0;
                                     Console.CursorTop -= 1;
@@ -102,9 +108,9 @@ namespace Vam.Commands
                                 splitContentStringBulder.RemoveAt(rowInList); // удаляем текущую строку из списка
                                 endCursorPosition = new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top - 1 };
                                 ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
-                                RenderRows(previousRowInList, splitContentStringBulder.Count + 1, row - 1, previousStrLen, 0); // перерендериваем все строки
+                                RenderRows(previousRowInList, _countOfRowsInSequenceOfRows + 1, row - 1, previousStrLen, 0); // перерендериваем все строки
                             }
-                            else if (splitContentStringBulder.Count - 1 < rowInList && col - 1 >= 0)
+                            else if (_lastIndexInSequenceOfRows < rowInList && col - 1 >= 0)
                             {
                                 Console.CursorLeft -= 1;
                             }
@@ -123,14 +129,14 @@ namespace Vam.Commands
                             break;
                         case ConsoleKey.Enter:
                             // если курсор ниже предела текущего массива - создаем новые строчки до этого положения
-                            if (rowInList > splitContentStringBulder.Count - 1)
+                            if (rowInList > _lastIndexInSequenceOfRows)
                             {
-                                var countOfOnlySpacesRowsBeforeNewRow = rowInList - (splitContentStringBulder.Count - 1);
+                                var countOfOnlySpacesRowsBeforeNewRow = rowInList - (_lastIndexInSequenceOfRows);
                                 // вставляем пустые строки до новой строки + новую строку
-                                InsertSpacesRowsToSplitRowsList(splitContentStringBulder.Count - 1, countOfOnlySpacesRowsBeforeNewRow + 1);
+                                InsertSpacesRowsToSplitRowsList(_lastIndexInSequenceOfRows, countOfOnlySpacesRowsBeforeNewRow + 1);
                             }
                             // если курсор находится в пределах текущего массива строк - переносим содержимое (если есть) справа от курсора на новую строку
-                            else if (rowInList >= 0 && rowInList <= splitContentStringBulder.Count - 1)
+                            else if (rowInList >= 0 && rowInList <= _lastIndexInSequenceOfRows)
                             {
                                 var currentStrBld = splitContentStringBulder[rowInList];
                                 var newRowStrBld = new StringBuilder();
@@ -148,7 +154,7 @@ namespace Vam.Commands
                                 }
                                 splitContentStringBulder.Insert(rowInList + 1, newRowStrBld);
                                 endCursorPosition =  new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top + 1 };
-                                RenderRows(rowInList, splitContentStringBulder.Count, row, 0, 0);
+                                RenderRows(rowInList, _countOfRowsInSequenceOfRows, row, 0, 0);
                                 Console.CursorTop++;
                             }
                             break;
@@ -206,39 +212,10 @@ namespace Vam.Commands
                         // для всех остальных клавишь просто добавляем значение символа в текущую строку
                         default:
                             // добавляем пустые строки, если пользователь ввел симвом вне пределов массива строк
-                            if (rowInList > splitContentStringBulder.Count - 1)
-                            {
-                                var countOfOnlySpacesRowsBeforeNewRow = rowInList - (splitContentStringBulder.Count - 1);
-                                // вставляем пустые строки до новой строки + новую строку
-                                InsertSpacesRowsToSplitRowsList(splitContentStringBulder.Count - 1, countOfOnlySpacesRowsBeforeNewRow + 1);
-                            }
+                            AddOnlySpacesRowsIfNecessary(_lastIndexInSequenceOfRows, rowInList);
                             var currentRowStrBld = splitContentStringBulder[rowInList];
-                            // если символ необходимо вставить внутри строки
-                            if (col < currentRowStrBld.Length)
-                            {
-                                currentRowStrBld.Insert(col, currentKey.KeyChar);
-                            }
-                            else
-                            {
-                                var distanceBetweenLastSymbolAndCurrentPosition = col - currentRowStrBld.Length;
-                                for (int i = 0; i < distanceBetweenLastSymbolAndCurrentPosition; i++)
-                                {
-                                    currentRowStrBld.Append(' ');
-                                }
-                                currentRowStrBld.Append(currentKey.KeyChar);
-                            }
-                            // (пока рендеим только одну) если размер буфера был увеличен - рендерим все строчки
-                            if (ChangeBufferSizeIfNecessary(currentRowStrBld.ToString()))
-                            {
-                                RenderRows(0, splitContentStringBulder.Count, 0, 0, 0);
-                                Console.CursorTop = row;
-                                Console.CursorLeft = col + 1;
-                            }
-                            // иначе только одну
-                            else
-                            {
-                                RenderRows(rowInList, rowInList + 1, row, col, 1); // рендерим данную строку
-                            }
+                            InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBld, col, col, currentKey.KeyChar);
+                            ChangeBufferSizeIfNecessaryThenSetCursorPosition(currentRowStrBld.ToString(), rowInList, new CursorPosition() { Top = row, Left = col });
                             break;
                     }
                 }
@@ -293,7 +270,7 @@ namespace Vam.Commands
                 Console.CursorLeft = 0;
                 Console.CursorTop = currentTop;
                 // выводим строку-заполнитель, если закончились строки в массиве
-                if (i >= splitContentStringBulder.Count)
+                if (i >= _countOfRowsInSequenceOfRows)
                 {
                     Console.Write(GetOnlySpacebarsRow());
                 }
@@ -314,7 +291,6 @@ namespace Vam.Commands
         /// <summary>
         /// Добавляет в указанном диапазоне пустые строки в массив строк.
         /// startIndex - включительно.
-        /// endIndex - не включительно.
         /// </summary>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
@@ -328,6 +304,11 @@ namespace Vam.Commands
             }
             splitContentStringBulder.InsertRange(startIndex, onlySpacesStringsList);
         }
+        /// <summary>
+        /// Форматирует текст для записи в файл
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         private static string GetTextForWriteToFile(List<StringBuilder> source)
         {
             string result = "";
@@ -337,12 +318,77 @@ namespace Vam.Commands
             }
             return result;
         }
+        /// <summary>
+        /// Сохраняет файл, расположенный по определенному пути
+        /// </summary>
+        /// <param name="path"></param>
         private static void SaveFile(string path)
         {
             using (var file = new StreamWriter(path))
             {
                 file.Write(GetTextForWriteToFile(splitContentStringBulder));
             }
+        }
+        /// <summary>
+        /// Добавляет новые пустые строки, если indexOfCurrentRowInSequence выходит за пределы последовательности строк.
+        /// </summary>
+        /// <param name="lastIndexInSequenceOfRows"></param>
+        /// <param name="indexOfCurrentRowInSequence"></param>
+        private static void AddOnlySpacesRowsIfNecessary(int lastIndexInSequenceOfRows, int indexOfCurrentRowInSequence)
+        {
+            if (indexOfCurrentRowInSequence > lastIndexInSequenceOfRows)
+            {
+                var countOfOnlySpacesRowsBeforeNewRow = indexOfCurrentRowInSequence - (lastIndexInSequenceOfRows);
+                // вставляем пустые строки до новой строки + новую строку
+                InsertSpacesRowsToSplitRowsList(lastIndexInSequenceOfRows, countOfOnlySpacesRowsBeforeNewRow + 1);
+            }
+        }
+        private static void InsertSequenceOfSymbolsToStringBuilderWithCheck(StringBuilder currentRowStrBld, int indexInsert, int currentCol, string symbols)
+        {
+            var currentLastIndexInRow = currentRowStrBld.Length;
+            // если символ необходимо вставить внутри строки
+            if (currentCol <= currentLastIndexInRow)
+            {
+                InsertSequenceOfSymbolsToStringBuilder(currentRowStrBld, indexInsert, symbols);
+            }
+            else
+            {
+                var distanceBetweenLastSymbolAndCurrentPosition = indexInsert - currentLastIndexInRow;
+                for (int i = 0; i < distanceBetweenLastSymbolAndCurrentPosition; i++)
+                {
+                    currentRowStrBld.Append(' ');
+                }
+                //indexInsert += distanceBetweenLastSymbolAndCurrentPosition; // увеличиваем индекс на кол-во добавленных пробелов
+                InsertSequenceOfSymbolsToStringBuilder(currentRowStrBld, indexInsert, symbols);
+            }
+        }
+        private static void ChangeBufferSizeIfNecessaryThenSetCursorPosition(string newRow, int rowIndexInRowsSequence, CursorPosition origignalCursorPosition)
+        {
+            if (ChangeBufferSizeIfNecessary(newRow))
+            {
+                RenderRows(0, _countOfRowsInSequenceOfRows, 0, 0, 0);
+                Console.CursorTop = origignalCursorPosition.Top;
+                Console.CursorLeft = origignalCursorPosition.Left + 1;
+            }
+            // иначе только одну
+            else
+            {
+                RenderRows(rowIndexInRowsSequence, rowIndexInRowsSequence + 1, origignalCursorPosition.Top, origignalCursorPosition.Left, 1); // рендерим данную строку
+            }
+        }
+        private static void InsertSequenceOfSymbolsToStringBuilderWithCheck(StringBuilder currentRowStrBld, int indexInsert, int currentCol, params char[] symbols)
+        {
+            var symbolsStr = String.Join("", symbols);
+            InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBld, indexInsert, currentCol, symbolsStr);
+        }
+        private static void InsertSequenceOfSymbolsToStringBuilder(StringBuilder sourceStrBld, int indexInsert, params char[] symbols)
+        {
+            var symbolsStr = String.Join("", symbols);
+            InsertSequenceOfSymbolsToStringBuilder(sourceStrBld, indexInsert, symbolsStr);
+        }
+        private static void InsertSequenceOfSymbolsToStringBuilder(StringBuilder sourceStrBld, int indexInsert, string symbols)
+        {
+            sourceStrBld.Insert(indexInsert, symbols);
         }
     }
 }
