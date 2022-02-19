@@ -11,6 +11,7 @@ Vam.exe --vam [pathToFile...]
 Vam.exe --cat [pathToFile...]
 ```
 ## Реализованные функции
+- Tab
 - Backspace 
 - Enter
 - Ввод текста при помощи клавиш
