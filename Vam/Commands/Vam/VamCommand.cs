@@ -53,7 +53,7 @@ namespace Vam.Commands
             // для удобства редактирвоания текста конвертируем все строки в StringBuilder
             foreach (var row in splitContent)
             {
-                splitContentStringBulder.Add(new StringBuilder(row));
+                splitContentStringBulder.Add(new StringBuilder(row.TrimEnd()));
             }
             #endregion
 
@@ -219,6 +219,10 @@ namespace Vam.Commands
 
                         // для всех остальных клавишь просто добавляем значение символа в текущую строку
                         default:
+                            var cl = Console.CursorLeft;
+                            var ct = Console.CursorTop;
+                            var cr = splitContentStringBulder[rowInList];
+                            var crl = cr.Length;
                             // добавляем пустые строки, если пользователь ввел симвом вне пределов массива строк
                             AddOnlySpacesRowsIfNecessary(_lastIndexInSequenceOfRows, rowInList);
                             var currentRowStrBld = splitContentStringBulder[rowInList];
@@ -375,7 +379,7 @@ namespace Vam.Commands
         /// <param name="symbols"></param>
         private static void InsertSequenceOfSymbolsToStringBuilderWithCheck(StringBuilder currentRowStrBld, int indexInsert, int currentCol, string symbols)
         {
-            var currentLastIndexInRow = currentRowStrBld.Length;
+            var currentLastIndexInRow = currentRowStrBld.Length - 1;
             // если символ необходимо вставить внутри строки
             if (currentCol <= currentLastIndexInRow)
             {
