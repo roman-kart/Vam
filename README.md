@@ -14,6 +14,14 @@ set vamCurrentSession=%cd%\VamAlpha0\Vam-main\Vam\bin\Debug\Vam.exe
 .\VamAlpha0\Vam-main\Vam\bin\Debug\Vam.exe --help 
 echo To use Vam in current session write ^%vamCurrentSession^% and press Enter. If you want to start Vam by writing "vam", you have to add [yourPath]\Vam\VamAlpha0\Vam-main\Vam\bin\Debug\ to the Path - environment variable.
 ```
+4. Для запуска программы в текущей сессии напишите в терминале
+```
+%vamCurrentSession% [attributes...]
+```
+Будьте внимательны, после того, как вы закроете текущее окно командной строки, вы не сможете воспользоваться этой командой.
+Для того, чтобы запускать программу без указания пути, 
+**добавьте путь**, по которому расположена данная программа, **в переменную окружения Path**.
+Подробнее в [официальной документации Microsoft](https://docs.microsoft.com/ru-ru/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)).
 ## Использование
 ### Редактирование текста
 ```
