@@ -213,7 +213,7 @@ namespace Vam.Commands
                             AddOnlySpacesRowsIfNecessary(_lastIndexInSequenceOfRows, rowInList);
                             var currentRowStrBldTmp = splitContentStringBulder[rowInList];
                             InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBldTmp, col, col, ' ', ' ', ' ', ' ');
-                            ChangeBufferSizeIfNecessaryThenSetCursorPosition(currentRowStrBldTmp.ToString(), rowInList, new CursorPosition() { Top = row, Left = col });
+                            ChangeBufferSizeIfNecessaryThenRenderRowsAndSetCursorPosition(currentRowStrBldTmp.ToString(), rowInList, new CursorPosition() { Top = row, Left = col });
                             Console.CursorLeft += 3;
                             break;
 
@@ -223,15 +223,7 @@ namespace Vam.Commands
                             AddOnlySpacesRowsIfNecessary(_lastIndexInSequenceOfRows, rowInList);
                             var currentRowStrBld = splitContentStringBulder[rowInList];
                             InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBld, col, col, currentKey.KeyChar);
-                            ChangeBufferSizeIfNecessaryThenSetCursorPosition(currentRowStrBld.ToString(), rowInList, new CursorPosition() { Top = row, Left = col });
-                            //InsertSequenceOfSymbolsToStringBuilderWithCheckTemplateMethod(
-                            //    _lastIndexInSequenceOfRows, 
-                            //    row, 
-                            //    rowInList, 
-                            //    col, 
-                            //    col, 
-                            //    currentKey.KeyChar
-                            //    );
+                            ChangeBufferSizeIfNecessaryThenRenderRowsAndSetCursorPosition(currentRowStrBld.ToString(), rowInList, new CursorPosition() { Top = row, Left = col });
                             break;
                     }
                 }
@@ -274,6 +266,14 @@ namespace Vam.Commands
             }
             return false;
         }
+        /// <summary>
+        /// Выводит строки на экран и устанавливает курсор.
+        /// </summary>
+        /// <param name="startIndex"></param>
+        /// <param name="endIndex"></param>
+        /// <param name="startTop"></param>
+        /// <param name="startLeft"></param>
+        /// <param name="offset"></param>
         private static void RenderRows(int startIndex, int endIndex, int startTop, int startLeft, int offset)
         {
             int currentTop = startTop;
@@ -300,6 +300,11 @@ namespace Vam.Commands
             startLeft = startLeft + offset < 0 ? startLeft : startLeft + offset; // курсор перемещается на определенное пользователем расстояние, если он не выходит за пределы экрана
             Console.SetCursorPosition(startLeft, startTop);
         }
+        /// <summary>
+        /// Удаляет escape-последовательности из строки.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         private static string DeleteEscapeSequenceFromString(string source)
         {
             return source.Replace("\n", "").Replace("\r", "");
@@ -359,6 +364,15 @@ namespace Vam.Commands
                 InsertSpacesRowsToSplitRowsList(lastIndexInSequenceOfRows, countOfOnlySpacesRowsBeforeNewRow + 1);
             }
         }
+        /// <summary>
+        /// Вставка последовательности символов в строку. 
+        /// Если индекс, по которому необходимо вставить элемент, 
+        /// находится вне текущей строки -  добавляет в строку пробелы и только потом вставляет символ.
+        /// </summary>
+        /// <param name="currentRowStrBld"></param>
+        /// <param name="indexInsert"></param>
+        /// <param name="currentCol"></param>
+        /// <param name="symbols"></param>
         private static void InsertSequenceOfSymbolsToStringBuilderWithCheck(StringBuilder currentRowStrBld, int indexInsert, int currentCol, string symbols)
         {
             var currentLastIndexInRow = currentRowStrBld.Length;
@@ -374,11 +388,10 @@ namespace Vam.Commands
                 {
                     currentRowStrBld.Append(' ');
                 }
-                //indexInsert += distanceBetweenLastSymbolAndCurrentPosition; // увеличиваем индекс на кол-во добавленных пробелов
                 InsertSequenceOfSymbolsToStringBuilder(currentRowStrBld, indexInsert, symbols);
             }
         }
-        private static void ChangeBufferSizeIfNecessaryThenSetCursorPosition(string newRow, int rowIndexInRowsSequence, CursorPosition origignalCursorPosition)
+        private static void ChangeBufferSizeIfNecessaryThenRenderRowsAndSetCursorPosition(string newRow, int rowIndexInRowsSequence, CursorPosition origignalCursorPosition)
         {
             if (ChangeBufferSizeIfNecessary(newRow))
             {
@@ -405,21 +418,6 @@ namespace Vam.Commands
         private static void InsertSequenceOfSymbolsToStringBuilder(StringBuilder sourceStrBld, int indexInsert, string symbols)
         {
             sourceStrBld.Insert(indexInsert, symbols);
-        }
-        private static void InsertSequenceOfSymbolsToStringBuilderWithCheckTemplateMethod(
-            int LastIndexInSequenceOfRows,
-            int currentRow,
-            int RowInList,
-            int currentCol,
-            int insertIndex,
-            params char[] symbols
-            )
-        {
-            // добавляем пустые строки, если пользователь ввел симвом вне пределов массива строк
-            AddOnlySpacesRowsIfNecessary(_lastIndexInSequenceOfRows, RowInList);
-            var currentRowStrBld = splitContentStringBulder[RowInList];
-            InsertSequenceOfSymbolsToStringBuilderWithCheck(currentRowStrBld, currentCol, insertIndex, symbols);
-            ChangeBufferSizeIfNecessaryThenSetCursorPosition(currentRowStrBld.ToString(), RowInList, new CursorPosition() { Top = currentRow, Left = currentCol });
         }
     }
 }
