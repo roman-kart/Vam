@@ -399,7 +399,7 @@ namespace Vam.Commands
         {
             if (ChangeBufferSizeIfNecessary(newRow))
             {
-                RenderRows(0, _countOfRowsInSequenceOfRows, 0, 0, 0);
+                RenderRows(0, _countOfRowsInSequenceOfRows, startCursorPosition.Top, startCursorPosition.Left, 0);
                 Console.CursorTop = origignalCursorPosition.Top;
                 Console.CursorLeft = origignalCursorPosition.Left + 1;
             }
