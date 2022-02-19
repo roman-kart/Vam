@@ -32,7 +32,6 @@ namespace Vam
                     VamCommand.Do(p.Vam);
                 }
             });
-            //var file = WorkWithFiles.GetFile(pathToFile);
         }
     }
 }

@@ -9,10 +9,11 @@ namespace Vam.Files
 {
     public class WorkWithFiles
     {
-        public static UserFile GetFile(string path)
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        /// Убирает пробелы и двойные кавычки из начала и конца файла.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static string NormalizePath(string path)
         {
             return path.Trim().Trim('"');
@@ -72,6 +73,23 @@ namespace Vam.Files
             {
                 return file.ReadToEnd();
             }
+        }
+        /// <summary>
+        /// Возвращает полный путь до файла. Если файла нет - создает новый пустой файл.
+        /// </summary>
+        /// <param name="originalPath"></param>
+        /// <returns></returns>
+        public static string CreateNewFileIfNecessaryThenGetFullPath(string originalPath)
+        {
+            var fullPathToFile = WorkWithFiles.GetPathToFile(originalPath); // получение полного пути до файла
+            bool isFileExists = File.Exists(fullPathToFile); // существует ли файл
+            // слздаем новый файл, если файла не существует
+            if (!isFileExists)
+            {
+                var file = File.Create(fullPathToFile); // создаем файл
+                file.Close(); // и освобождаем его
+            }
+            return fullPathToFile;
         }
     }
 }
