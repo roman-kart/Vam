@@ -16,7 +16,7 @@ echo To use Vam in current session write ^%vamCurrentSession^% and press Enter. 
 ```
 4. Для запуска программы в текущей сессии напишите в терминале
 ```
-%vamCurrentSession% [attributes...]
+%vamCurrentSession% [args...]
 ```
 Будьте внимательны, **после того, как вы закроете текущее окно командной строки, вы не сможете воспользоваться этой командой.**</br>
 Для того, **чтобы запускать программу без указания пути**, 
@@ -27,6 +27,7 @@ echo To use Vam in current session write ^%vamCurrentSession^% and press Enter. 
 ```
 Vam.exe --vam [pathToFile...]
 ```
+**Если такого файла не существует - он создастся автоматически**
 ### Вывод содержимого файла на экран
 ```
 Vam.exe --cat [pathToFile...]
