@@ -82,6 +82,11 @@ namespace Vam.Commands
                 {
                     SaveFile(fullPathToFile);
                 }
+                // пропускаем, если нажата клавиша Windows
+                else if (currentKey.Key == ConsoleKey.LeftWindows || currentKey.Key == ConsoleKey.RightWindows)
+                {
+                    // пропуск
+                }
                 // если не является управляющей командой
                 else
                 {
