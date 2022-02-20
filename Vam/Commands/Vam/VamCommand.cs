@@ -270,7 +270,7 @@ namespace Vam.Commands
         {
             if (rowLength > Console.BufferWidth)
             {
-                Console.BufferWidth = rowLength;
+                Console.BufferWidth = rowLength * 2;
                 return true;
             }
             return false;
