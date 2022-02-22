@@ -93,6 +93,7 @@ namespace Vam.Commands
                     var row = Console.CursorTop;
                     var col = Console.CursorLeft;
                     var rowInList = row - startCursorPosition.Top;
+                    var lastRowIndex = startCursorPosition.Top + splitContentStringBulder.Count - 1;
                     var previousRowInList = rowInList - 1;
                     switch (currentKey.Key)
                     {
@@ -173,7 +174,7 @@ namespace Vam.Commands
                             break;
                         case ConsoleKey.UpArrow:
                             // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: endCursorPosition.Top))
+                            if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
                             {
                                 Console.CursorTop -= 1;
                             }
@@ -188,7 +189,7 @@ namespace Vam.Commands
                             break;
                         case ConsoleKey.DownArrow:
                             // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: endCursorPosition.Top))
+                            if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
                             {
                                 Console.CursorTop += 1;
                             }
