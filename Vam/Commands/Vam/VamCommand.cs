@@ -117,7 +117,7 @@ namespace Vam.Commands
                                 ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
                                 //RenderRows(previousRowInList, _countOfRowsInSequenceOfRows + 1, row - 1, previousStrLen, 0); // перерендериваем все строки
                                 // копируем все неизмененные строки на одну строку ниже
-                                Console.MoveBufferArea(0, rowInList + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - (rowInList + 1), 0, rowInList);
+                                Console.MoveBufferArea(0, row + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - (rowInList + 1), 0, row);
                                 RenderRows(rowInList - 1, rowInList + 1, row - 1, previousStrLen, 0); // рендерим измененные строки
                             }
                             else if (_lastIndexInSequenceOfRows < rowInList && col - 1 >= 0)
@@ -165,7 +165,7 @@ namespace Vam.Commands
                                 splitContentStringBulder.Insert(rowInList + 1, newRowStrBld);
                                 endCursorPosition =  new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top + 1 };
                                 // копируем все неизмененные строки на одну строку ниже
-                                Console.MoveBufferArea(0, rowInList + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - rowInList, 0, rowInList + 2);
+                                Console.MoveBufferArea(0, row + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - rowInList, 0, row + 2);
                                 RenderRows(rowInList, rowInList + 2, row, 0, 0); // рендерим измененные строки
                                 Console.CursorTop++;
                             }
