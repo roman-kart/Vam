@@ -59,7 +59,7 @@ namespace Vam.Commands
 
             #region первоначальная настройка окна консоли
             lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
-            ChangeBufferSizeIfNecessary(lengthOfLongestRow);
+            ChangeBufferSizeIfNecessary(2048); // маловероятно, что строка кода будет превышать длину в 2048 символов
             startCursorPosition = new CursorPosition() { Left = Console.CursorLeft, Top = Console.CursorTop }; // позиция курсора до вывода файла
             endCursorPosition = new CursorPosition() { Left = 0, Top = startCursorPosition.Top + _countOfRowsInSequenceOfRows }; // самая левая позиция курсора после вывода файла
             #endregion
