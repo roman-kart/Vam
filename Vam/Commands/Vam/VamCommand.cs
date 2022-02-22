@@ -59,7 +59,7 @@ namespace Vam.Commands
 
             #region первоначальная настройка окна консоли
             lengthOfLongestRow = WorkWithFileContent.LengthOfLongestString(splitContent); // определяем максимальную длину строки в исходном файле
-            ChangeBufferSizeIfNecessary(lengthOfLongestRow);
+            ChangeBufferSizeIfNecessary(2048); // маловероятно, что строка кода будет превышать длину в 2048 символов
             startCursorPosition = new CursorPosition() { Left = Console.CursorLeft, Top = Console.CursorTop }; // позиция курсора до вывода файла
             endCursorPosition = new CursorPosition() { Left = 0, Top = startCursorPosition.Top + _countOfRowsInSequenceOfRows }; // самая левая позиция курсора после вывода файла
             #endregion
@@ -93,6 +93,7 @@ namespace Vam.Commands
                     var row = Console.CursorTop;
                     var col = Console.CursorLeft;
                     var rowInList = row - startCursorPosition.Top;
+                    var lastRowIndex = startCursorPosition.Top + splitContentStringBulder.Count - 1;
                     var previousRowInList = rowInList - 1;
                     switch (currentKey.Key)
                     {
@@ -164,29 +165,31 @@ namespace Vam.Commands
                             }
                             break;
                         case ConsoleKey.LeftArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(leftDifference: -1))
-                            {
-                                Console.CursorLeft -= 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(leftDifference: -1))
+                            //{
+                            //    Console.CursorLeft -= 1;
+                            //}
+                            ChangeCursorPositionHorizontal.Do(-1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.UpArrow:
                             // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: endCursorPosition.Top))
+                            if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
                             {
                                 Console.CursorTop -= 1;
                             }
                             break;
                         case ConsoleKey.RightArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(leftDifference: 1))
-                            {
-                                Console.CursorLeft += 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(leftDifference: 1))
+                            //{
+                            //    Console.CursorLeft += 1;
+                            //}
+                            ChangeCursorPositionHorizontal.Do(+1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.DownArrow:
                             // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: endCursorPosition.Top))
+                            if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
                             {
                                 Console.CursorTop += 1;
                             }
