@@ -164,11 +164,12 @@ namespace Vam.Commands
                             }
                             break;
                         case ConsoleKey.LeftArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(leftDifference: -1))
-                            {
-                                Console.CursorLeft -= 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(leftDifference: -1))
+                            //{
+                            //    Console.CursorLeft -= 1;
+                            //}
+                            ChangeCursorPositionHorizontal.Do(-1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.UpArrow:
                             // если курсор не выходит за пределы экрана
@@ -178,11 +179,12 @@ namespace Vam.Commands
                             }
                             break;
                         case ConsoleKey.RightArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(leftDifference: 1))
-                            {
-                                Console.CursorLeft += 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(leftDifference: 1))
+                            //{
+                            //    Console.CursorLeft += 1;
+                            //}
+                            ChangeCursorPositionHorizontal.Do(+1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.DownArrow:
                             // если курсор не выходит за пределы экрана

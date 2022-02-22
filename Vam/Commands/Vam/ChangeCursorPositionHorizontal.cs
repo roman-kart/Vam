@@ -21,7 +21,7 @@ namespace Vam.Commands.Vam
             var currentRowStrLength = currentRowStr.Length;
 
             var previousRowIndex = currentRowIndex - 1;
-            var previousRowStr = previousRowIndex < 0 ? null : sourceString[currentRowIndex];
+            var previousRowStr = previousRowIndex < 0 ? null : sourceString[previousRowIndex];
             var previousRowStrLength = previousRowStr == null ? -1 : previousRowStr.Length;
 
             var lastRowIndex = sourceString.Count - 1;
