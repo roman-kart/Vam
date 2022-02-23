@@ -65,7 +65,8 @@ namespace Vam.Commands
             #endregion
 
             #region выводим содержимое файла на экран
-            RenderRows(0, _countOfRowsInSequenceOfRows, startCursorPosition.Top, 0, 0);
+            //RenderRows(0, _countOfRowsInSequenceOfRows, startCursorPosition.Top, 0, 0);
+            Console.WriteLine(content); // вывод содержимого на экран (в прошлый раз с таким способом были проблемы, однако, сейчас их пока-что не наблюдается)
             #endregion
 
             #region установка размера окна и положения курсора
@@ -184,11 +185,12 @@ namespace Vam.Commands
                             ChangeCursorPositionHorizontal.Do(-1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.UpArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
-                            {
-                                Console.CursorTop -= 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
+                            //{
+                            //    Console.CursorTop -= 1;
+                            //}
+                            ChangeCursorPositionVertical.Do(-1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.RightArrow:
                             //// если курсор не выходит за пределы экрана
@@ -199,11 +201,12 @@ namespace Vam.Commands
                             ChangeCursorPositionHorizontal.Do(+1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.DownArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
-                            {
-                                Console.CursorTop += 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
+                            //{
+                            //    Console.CursorTop += 1;
+                            //}
+                            ChangeCursorPositionVertical.Do(1, splitContentStringBulder, rowInList, col);
                             break;
 
                         // функциональные клавиши, для которых пока нет реализации

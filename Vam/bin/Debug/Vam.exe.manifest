@@ -54,14 +54,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Vam.exe" size="15872">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Vam.exe" size="16384">
       <assemblyIdentity name="Vam" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>sRuuxFnw4uLEmBB38OOK9DDRZMPbWA4RiAOdymCdhT0=</dsig:DigestValue>
+        <dsig:DigestValue>gGGBO1onzvPFlrcNS/fMrk3OcrWOVEmP8RvNkp4I874=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
