@@ -117,7 +117,12 @@ namespace Vam.Commands
                                 ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
                                 //RenderRows(previousRowInList, _countOfRowsInSequenceOfRows + 1, row - 1, previousStrLen, 0); // перерендериваем все строки
                                 // копируем все неизмененные строки на одну строку ниже
-                                Console.MoveBufferArea(0, row + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - (rowInList + 1), 0, row);
+                                // если можем что-либо перенести на следующую строку
+                                if (_countOfRowsInSequenceOfRows - (rowInList + 1) >= 0)
+                                {
+                                    // переносим
+                                    Console.MoveBufferArea(0, row + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - (rowInList + 1), 0, row);
+                                }
                                 RenderRows(rowInList - 1, rowInList + 1, row - 1, previousStrLen, 0); // рендерим измененные строки
                             }
                             else if (_lastIndexInSequenceOfRows < rowInList && col - 1 >= 0)
