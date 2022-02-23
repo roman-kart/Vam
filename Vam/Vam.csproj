@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Commands\Cat\CatCommand.cs" />
     <Compile Include="Commands\Vam\ChangeCursorPositionHorizontal.cs" />
+    <Compile Include="Commands\Vam\ChangeCursorPositionVertical.cs" />
     <Compile Include="Commands\Vam\CursorPosition.cs" />
     <Compile Include="Commands\Vam\NavigationCheck.cs" />
     <Compile Include="Commands\OptionsCommandLine.cs" />

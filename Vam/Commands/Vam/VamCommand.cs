@@ -65,7 +65,8 @@ namespace Vam.Commands
             #endregion
 
             #region выводим содержимое файла на экран
-            RenderRows(0, _countOfRowsInSequenceOfRows, startCursorPosition.Top, 0, 0);
+            //RenderRows(0, _countOfRowsInSequenceOfRows, startCursorPosition.Top, 0, 0);
+            Console.WriteLine(content); // вывод содержимого на экран (в прошлый раз с таким способом были проблемы, однако, сейчас их пока-что не наблюдается)
             #endregion
 
             #region установка размера окна и положения курсора
@@ -98,9 +99,10 @@ namespace Vam.Commands
                     switch (currentKey.Key)
                     {
                         case ConsoleKey.Backspace:
-                            // если при нажатии клавиши BackSpace курсор находился на левом краю консоли и если курсор не находится в первой строке, то необходимо 
+                            // если при нажатии клавиши BackSpace курсор находился на левом краю консоли и если курсор не находится в первой строке, то необходимо перенести данную строку на следующую строку
                             if (col - 1 < 0 && previousRowInList >= 0)
                             {
+                                // если курсор находится за пределами строк - просто перемещаем курсор влево
                                 if (_lastIndexInSequenceOfRows < rowInList)
                                 {
                                     Console.CursorLeft = 0;
@@ -114,7 +116,15 @@ namespace Vam.Commands
                                 splitContentStringBulder.RemoveAt(rowInList); // удаляем текущую строку из списка
                                 endCursorPosition = new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top - 1 };
                                 ChangeBufferSizeIfNecessary(splitContentStringBulder[previousRowInList].ToString());
-                                RenderRows(previousRowInList, _countOfRowsInSequenceOfRows + 1, row - 1, previousStrLen, 0); // перерендериваем все строки
+                                //RenderRows(previousRowInList, _countOfRowsInSequenceOfRows + 1, row - 1, previousStrLen, 0); // перерендериваем все строки
+                                // копируем все неизмененные строки на одну строку ниже
+                                // если можем что-либо перенести на следующую строку
+                                if (_countOfRowsInSequenceOfRows - (rowInList + 1) >= 0)
+                                {
+                                    // переносим
+                                    Console.MoveBufferArea(0, row + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - (rowInList + 1), 0, row);
+                                }
+                                RenderRows(rowInList - 1, rowInList + 1, row - 1, previousStrLen, 0); // рендерим измененные строки
                             }
                             else if (_lastIndexInSequenceOfRows < rowInList && col - 1 >= 0)
                             {
@@ -160,7 +170,9 @@ namespace Vam.Commands
                                 }
                                 splitContentStringBulder.Insert(rowInList + 1, newRowStrBld);
                                 endCursorPosition =  new CursorPosition() { Left = endCursorPosition.Left, Top = endCursorPosition.Top + 1 };
-                                RenderRows(rowInList, _countOfRowsInSequenceOfRows, row, 0, 0);
+                                // копируем все неизмененные строки на одну строку ниже
+                                Console.MoveBufferArea(0, row + 1, lengthOfLongestRow, _countOfRowsInSequenceOfRows - rowInList, 0, row + 2);
+                                RenderRows(rowInList, rowInList + 2, row, 0, 0); // рендерим измененные строки
                                 Console.CursorTop++;
                             }
                             break;
@@ -173,11 +185,12 @@ namespace Vam.Commands
                             ChangeCursorPositionHorizontal.Do(-1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.UpArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
-                            {
-                                Console.CursorTop -= 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(topDifference: -1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
+                            //{
+                            //    Console.CursorTop -= 1;
+                            //}
+                            ChangeCursorPositionVertical.Do(-1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.RightArrow:
                             //// если курсор не выходит за пределы экрана
@@ -188,11 +201,12 @@ namespace Vam.Commands
                             ChangeCursorPositionHorizontal.Do(+1, splitContentStringBulder, rowInList, col);
                             break;
                         case ConsoleKey.DownArrow:
-                            // если курсор не выходит за пределы экрана
-                            if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
-                            {
-                                Console.CursorTop += 1;
-                            }
+                            //// если курсор не выходит за пределы экрана
+                            //if (NavigationCheck.IsCursorInBuffer(topDifference: 1, startTop: startCursorPosition.Top, endTop: lastRowIndex))
+                            //{
+                            //    Console.CursorTop += 1;
+                            //}
+                            ChangeCursorPositionVertical.Do(1, splitContentStringBulder, rowInList, col);
                             break;
 
                         // функциональные клавиши, для которых пока нет реализации
@@ -248,10 +262,11 @@ namespace Vam.Commands
         /// Применяется для очищения экрана перед показом обновленной строки.
         /// </summary>
         /// <returns></returns>
-        private static string GetOnlySpacebarsRow()
+        private static string GetOnlySpacebarsRow(int length = -1)
         {
+            length = length < 0 ? Console.BufferWidth : length;
             var result = new StringBuilder();
-            for (int i = 0; i < Console.BufferWidth; i++)
+            for (int i = 0; i < length; i++)
             {
                 result.Append(" ");
             }
@@ -280,20 +295,27 @@ namespace Vam.Commands
         }
         /// <summary>
         /// Выводит строки на экран и устанавливает курсор.
+        /// previousLength и isDelete предназначены для оптимизации. 
+        /// previousLength - длина предыдущей версии строки. По умолчанию перед выводом строки на экран выводится пустая строка,
+        /// длина которой равна ширине буфера. 
+        /// isDelete - произошла ли в строке операция удаления. 
+        /// Если не произошла - просто выводим новую строку, так как её длина увеличилась.
         /// </summary>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
         /// <param name="startTop"></param>
         /// <param name="startLeft"></param>
         /// <param name="offset"></param>
-        private static void RenderRows(int startIndex, int endIndex, int startTop, int startLeft, int offset)
+        private static void RenderRows(int startIndex, int endIndex, int startTop, int startLeft, int offset, int previousRowLength = -1, bool isDelete = true)
         {
+            previousRowLength = previousRowLength < 0 ? Console.BufferWidth : previousRowLength; // устанавливаем валидное значение
             int currentTop = startTop;
             for (int i = startIndex; i < endIndex; i++)
             {
+                // если произошла операция удаления - перед рендерингом строки выводим пустую строку
                 Console.CursorLeft = 0;
                 Console.CursorTop = currentTop;
-                Console.Write(GetOnlySpacebarsRow());
+                Console.Write(GetOnlySpacebarsRow(previousRowLength));
 
                 Console.CursorLeft = 0;
                 Console.CursorTop = currentTop;
