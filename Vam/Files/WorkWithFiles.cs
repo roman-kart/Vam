@@ -79,15 +79,20 @@ namespace Vam.Files
         /// </summary>
         /// <param name="originalPath"></param>
         /// <returns></returns>
-        public static string CreateNewFileIfNecessaryThenGetFullPath(string originalPath)
+        public static string CreateNewFileIfNecessaryThenGetFullPath(string originalPath, out bool IsFileCreated)
         {
             var fullPathToFile = WorkWithFiles.GetPathToFile(originalPath); // получение полного пути до файла
             bool isFileExists = File.Exists(fullPathToFile); // существует ли файл
             // слздаем новый файл, если файла не существует
             if (!isFileExists)
             {
+                IsFileCreated = true;
                 var file = File.Create(fullPathToFile); // создаем файл
                 file.Close(); // и освобождаем его
+            }
+            else
+            {
+                IsFileCreated = false;
             }
             return fullPathToFile;
         }

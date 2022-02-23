@@ -16,6 +16,38 @@ namespace Vam.Commands
     /// </summary>
     public static class VamCommand
     {
+        private static bool _fileSaved = false;
+        private static bool FileSaved
+        {
+            get
+            {
+                return _fileSaved;
+            }
+            set
+            {
+                // если файл не сохранен - устанавливаем переданное значение
+                if (!_fileSaved)
+                {
+                    _fileSaved = value;
+                }
+            }
+        }
+        private static bool _fileCreated = false;
+        private static bool FileCreated
+        {
+            get
+            {
+                return _fileCreated;
+            }
+            set
+            {
+                // если файл не был создан - устанавливаем переданное значение
+                if (!_fileCreated)
+                {
+                    _fileCreated = value;
+                }
+            }
+        }
         /// <summary>
         /// Содержимое файла, поделенное на строки. Каждая строка хранится в отдельном экземпляре StringBuilder
         /// </summary>
@@ -44,7 +76,9 @@ namespace Vam.Commands
         public static void Do(string path)
         {
             #region получение пути файла и содержимого файла
-            fullPathToFile = WorkWithFiles.CreateNewFileIfNecessaryThenGetFullPath(path); // получаем полный путь до файла
+            bool IsFileCreated; // переменная для получения информации, был ли создан файл
+            fullPathToFile = WorkWithFiles.CreateNewFileIfNecessaryThenGetFullPath(path, out IsFileCreated); // получаем полный путь до файла
+            FileCreated = IsFileCreated; // присваиваем значение переменной свойству (пока, увы, так неоптимально)
             var content = WorkWithFiles.ReadAllFile(fullPathToFile); // получаем содержимое файла
             #endregion
 
@@ -255,7 +289,8 @@ namespace Vam.Commands
                 }
                 currentKey = Console.ReadKey(true); // получаем следующий введенный пользователем символ
             }
-            Console.SetCursorPosition(endCursorPosition.Left, endCursorPosition.Top); // ставим курсор на строку после выведенного текста
+            Console.SetCursorPosition(0, startCursorPosition.Top + splitContentStringBulder.Count); // ставим курсор на строку после выведенного текста
+            DeleteIncidentalCreatingFile(FileSaved, FileCreated, fullPathToFile);
         }
         /// <summary>
         /// Возвращает строку-заполнитель, состоящую из пробелов.
@@ -383,6 +418,7 @@ namespace Vam.Commands
             {
                 file.Write(GetTextForWriteToFile(splitContentStringBulder));
             }
+            FileSaved = true;
         }
         /// <summary>
         /// Добавляет новые пустые строки, если indexOfCurrentRowInSequence выходит за пределы последовательности строк.
@@ -452,6 +488,14 @@ namespace Vam.Commands
         private static void InsertSequenceOfSymbolsToStringBuilder(StringBuilder sourceStrBld, int indexInsert, string symbols)
         {
             sourceStrBld.Insert(indexInsert, symbols);
+        }
+        private static void DeleteIncidentalCreatingFile(bool IsFileSaved, bool IsFileCreated, string path)
+        {
+            // если файл ни разу не был сохранен, а также был создан
+            if ((!IsFileSaved) && IsFileCreated)
+            {
+                System.IO.File.Delete(path); // удаляем данный файл
+            }
         }
     }
 }
