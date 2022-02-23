@@ -18,6 +18,8 @@ namespace Vam.Commands.Vam
         /// <param name="topDiff"></param>
         public static void Do(int verticalDiff, List<StringBuilder> sourceString, int currentRowIndex, int currentColumnIndex)
         {
+            var lastRowIndex = sourceString.Count - 1;
+
             var currentRowStr = sourceString[currentRowIndex];
             var currentRowStrLength = currentRowStr.Length;
 
@@ -37,7 +39,7 @@ namespace Vam.Commands.Vam
             // если необходимо перенести курсор вниз
             else if (verticalDiff > 0)
             {
-                ToDown(verticalDiff, currentRowIndex, currentColumnIndex, currentRowStrLength, nextRowStrLength, nextRowStrLength);
+                ToDown(verticalDiff, currentRowIndex, currentColumnIndex, currentRowStrLength, nextRowStrLength, lastRowIndex);
             }
             // если необходимо переместить курсор вправо
         }
